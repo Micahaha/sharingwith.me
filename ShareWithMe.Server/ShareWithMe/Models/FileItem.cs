@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-amespace ShareWithMe.Models;
+namespace ShareWithMe.Models;
 
 
 
@@ -7,7 +7,7 @@ amespace ShareWithMe.Models;
 // Model class for the FileItem table.
 
 
-[Index(nameof(ShareCode), IsUnique = true)]
+[Index(nameof(shareCode), IsUnique = true)]
 public class FileItem
 {
     public int Id { get; set; }

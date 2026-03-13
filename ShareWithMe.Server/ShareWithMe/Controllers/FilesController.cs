@@ -64,7 +64,7 @@ public class FilesController : ControllerBase
         await _dbContext.Files.AddAsync(fileItem);
         await _dbContext.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetFile), new { id = fileItem.Id }, new { url = $"/api/files/{fileItem.Id}" });
+        return CreatedAtAction(nameof(GetFile), new { shareCode = fileItem.shareCode }, new { url = $"/api/files/{fileItem.shareCode}" });
         
         }
         catch (Exception ex)
@@ -82,19 +82,29 @@ public class FilesController : ControllerBase
     // Get a file by its ID. This is the download link.
 
     [HttpGet("{shareCode}")]
-    public async Task<IActionResult> GetFile(string shareCode)
+    public async Task<IActionResult> GetFile(string? shareCode)
     {
-        
-        // find the file by the share code
-        var file = await _dbContext.Files.FindAsync(shareCode);
-        if (file == null) return NotFound();
+        if (shareCode == null) return BadRequest(new { Message = "Share code is required" });
 
-        var fileStream = await _fileStorageService.OpenReadAsync(file.BlobName);
+
+
+
+        // query entire row from the database
+        var shared_file_record = await _dbContext.Files.Where(f => f.shareCode == shareCode).FirstOrDefaultAsync();
+
+        if (shared_file_record == null) return NotFound();
+
+        // shared_file is the shared blob name designed to match my blobfile in az stroage. 
+        var shared_file_BlobName = shared_file_record.BlobName;
+        
+
+
+        var fileStream = await _fileStorageService.OpenReadAsync(shared_file_BlobName);
         if (fileStream == null) return NotFound();
 
-        var fileContent = new FileStreamResult(fileStream, file.ContentType);
+        var fileContent = new FileStreamResult(fileStream, shared_file_record.ContentType);
 
-
+ 
         return fileContent;
 
         // test the file stream result
