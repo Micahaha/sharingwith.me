@@ -2,11 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using ShareWithMe.Data;
 using ShareWithMe.Services;
 using ShareWithMe.Models;
+using ShareWithMe.Dtos;
 using System.Net;
-using System.IO;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace ShareWithMe.Controllers;
@@ -26,39 +24,30 @@ public class FilesController : ControllerBase
     }
 
 
+
+
+    [HttpPost("presign")]
+    public IActionResult PresignUpload([FromBody] PresignRequest request)
+    {
+        var blobName = Guid.NewGuid().ToString();
+        var sasUri = _fileStorageService.GenerateSasUploadUrl(blobName);
+return Ok(new { sasUrl = sasUri.ToString(), blobName, request.ContentType, request.SizeBytes });
+    }
+
+
     // return 201 after successful upload
    
     [HttpPost]
-    public async Task<IActionResult> UploadFile(IFormFile file)
+    public async Task<IActionResult> RegisterFile([FromBody] RegisterFileRequest request)
     {
-        if (file == null) {
-            return BadRequest(new { Message = "No file uploaded" });
-        }
-
-        if (file.Length == 0) {
-            return BadRequest(new { Message = "File is empty" });
-        }
-
-        if (file.ContentType == null) {
-            return BadRequest(new { Message = "File content type is null" });
-        }
-
-        var fileStream = file.OpenReadStream();
-        var blobName = Guid.NewGuid().ToString();
-
-
-        
         try {
-            // Save file to blob storage
-        await _fileStorageService.SaveAsync(blobName, fileStream);
-
             // save file to database (MySQL database)
         var fileItem = new FileItem
         {
-            OriginalFileName = file.FileName,
-            BlobName = blobName,
-            ContentType = file.ContentType,
-            SizeBytes = file.Length,
+            OriginalFileName = request.OriginalFileName,
+            BlobName = request.BlobName,
+            ContentType = request.ContentType,
+            SizeBytes = request.SizeBytes,
             IsPublic = true,
         };
         
@@ -72,10 +61,6 @@ public class FilesController : ControllerBase
         {
             return StatusCode((int)HttpStatusCode.InternalServerError, new { Message = "An internal server error occurred", Detail = ex.Message });
         }
-
-
-
-    
 
     }
 

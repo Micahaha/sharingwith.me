@@ -3,12 +3,16 @@ namespace ShareWithMe.Services;
 public interface IFileStorageService {
 
     // 
-    /// Saves a file to the storage.
+    /// Generates a SAS upload URL for a given blob name.
     /// </summary>
-    /// <param name="blobName">The name of the blob to save the file to.</param>
-    /// <param name="fileStream">The stream of the file to save.</param>
-    /// <returns>The URL of the saved file.</returns>
-    Task<string>  SaveAsync(string blobName, Stream fileStream, CancellationToken cancellationToken = default);
+    /// <param name="blobName">The name of the blob to generate the SAS upload URL for.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The SAS upload URL.</returns>
+    /// <remarks>
+    /// Allows Upload from Client directly to Azure Blob Storage.
+    /// Reduces connectivity and bandwidth requirements for large file load on server. 
+
+    Uri GenerateSasUploadUrl(string blobName, CancellationToken cancellationToken = default);
 
     // Open a file from the storage.
     /// <summary>

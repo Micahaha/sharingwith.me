@@ -2,6 +2,7 @@ namespace ShareWithMe.Services;
 
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
 using Microsoft.Extensions.Configuration;
 using ShareWithMe.Services;
 
@@ -15,20 +16,24 @@ public class FileStorageService : IFileStorageService {
 
         _configuration = configuration;
         blobContainerConnectionString = _configuration.GetConnectionString("BlobStorageConnectionString");
-        _containerName = _configuration.GetSection("FileStorage:ContainerName").Value;
+        _containerName = configuration.GetSection("FileStorage:ContainerName").Value;
 
     }
-    public async Task<string> SaveAsync(string blobName, Stream fileStream, CancellationToken cancellationToken = default) {
+    public Uri GenerateSasUploadUrl(string blobName, CancellationToken cancellationToken = default)
+    {
+
+        
         var blobServiceClient = new BlobServiceClient(blobContainerConnectionString);
-
-        // stream file from fileStream to blob container.
         var blobContainerClient = blobServiceClient.GetBlobContainerClient(_containerName);
-        fileStream.Seek(0, SeekOrigin.Begin);
+        var blobClient = blobContainerClient.GetBlobClient(blobName);
 
-        await blobContainerClient.UploadBlobAsync(blobName, fileStream);
-        return blobName;
+        var sasUri = blobClient.GenerateSasUri(BlobSasPermissions.Write, DateTimeOffset.UtcNow.AddHours(1));
+
+        return sasUri;
+
+
+
     }
-
 
     // Open a file from the storage.
     public async Task<Stream> OpenReadAsync(string blobName, CancellationToken cancellationToken = default) {
