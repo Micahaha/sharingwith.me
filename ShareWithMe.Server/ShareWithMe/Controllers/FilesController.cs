@@ -31,7 +31,7 @@ public class FilesController : ControllerBase
     {
         var blobName = Guid.NewGuid().ToString();
         var sasUri = _fileStorageService.GenerateSasUploadUrl(blobName);
-return Ok(new { sasUrl = sasUri.ToString(), blobName, request.ContentType, request.SizeBytes });
+return Ok(new { sasUrl = sasUri.ToString(), blobName});
     }
 
 

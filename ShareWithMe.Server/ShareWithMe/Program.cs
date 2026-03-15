@@ -15,7 +15,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowShareWithMe", builder =>
     {
-        builder.WithOrigins("http://localhost:3000")
+        builder.WithOrigins("http://localhost:3000", "http://192.168.1.177:3000")
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
