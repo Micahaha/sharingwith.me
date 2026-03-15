@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ShareWithMe.Data;
+using ShareWithMe.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -30,10 +31,14 @@ builder.Services.AddScoped<IFileStorageService, FileStorageService>();
 
 var app = builder.Build();
 
+// cors policy
+app.UseCors("AllowShareWithMe");
+
 
 // Map controllers
 
 app.MapControllers();
+
 
 // test DB connection once at startup
 using (var scope = app.Services.CreateScope())

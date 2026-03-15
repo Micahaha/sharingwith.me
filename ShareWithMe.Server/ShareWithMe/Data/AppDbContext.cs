@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-
+using ShareWithMe.Models;
 namespace ShareWithMe.Data;
 
 public class AppDbContext : DbContext

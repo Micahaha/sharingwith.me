@@ -17,7 +17,7 @@ public interface IFileStorageService {
     /// <param name="blobName">The name of the blob to open the file from.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The stream of the opened file.</returns>
-    Task<Stream> OpenReadAsync(string blobName, CancellationToken cancellationToken = default)?;
+    Task<Stream> OpenReadAsync(string blobName, CancellationToken cancellationToken = default);
 
 
 
