@@ -4,7 +4,6 @@ using ShareWithMe.Services;
 using ShareWithMe.Models;
 using ShareWithMe.Dtos;
 using System.Net;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace ShareWithMe.Controllers;
@@ -49,6 +48,7 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
             ContentType = request.ContentType,
             SizeBytes = request.SizeBytes,
             IsPublic = true,
+            ExpiresAt = DateTime.UtcNow.AddHours(6),
         };
         
         await _dbContext.Files.AddAsync(fileItem);
@@ -72,27 +72,15 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
     {
         if (shareCode == null) return BadRequest(new { Message = "Share code is required" });
 
-
-
-
         // query entire row from the database
         var shared_file_record = await _dbContext.Files.Where(f => f.shareCode == shareCode).FirstOrDefaultAsync();
-
         if (shared_file_record == null) return NotFound();
 
-        // shared_file is the shared blob name designed to match my blobfile in az stroage. 
-        var shared_file_BlobName = shared_file_record.BlobName;
-        
+        if (shared_file_record.ExpiresAt.HasValue && shared_file_record.ExpiresAt.Value < DateTime.UtcNow)
+            return NotFound(new { Message = "This file has expired and is no longer available." });
 
-
-        var fileStream = await _fileStorageService.OpenReadAsync(shared_file_BlobName);
-        if (fileStream == null) return NotFound();
-
-        var fileContent = new FileStreamResult(fileStream, shared_file_record.ContentType);
-
- 
-        return fileContent;
-
+        var sasUri = _fileStorageService.GenerateSasDownloadUrl(shared_file_record.BlobName, shared_file_record.OriginalFileName);
+        return Redirect(sasUri.ToString());
         // test the file stream result
     }
 }

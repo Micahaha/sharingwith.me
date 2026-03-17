@@ -35,6 +35,24 @@ public class FileStorageService : IFileStorageService {
 
     }
 
+    public Uri GenerateSasDownloadUrl(string blobName, string originalFileName) {
+        var blobServiceClient = new BlobServiceClient(blobContainerConnectionString);
+        var blobContainerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+        var blobClient = blobContainerClient.GetBlobClient(blobName);
+
+        var sasBuilder = new BlobSasBuilder
+        {
+            BlobContainerName = _containerName,
+            BlobName = blobName,
+            Resource = "b",
+            ExpiresOn = DateTimeOffset.UtcNow.AddHours(1),
+            ContentDisposition = $"attachment; filename=\"{originalFileName}\""
+        };
+        sasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+        return blobClient.GenerateSasUri(sasBuilder);
+    }
+
     // Open a file from the storage.
     public async Task<Stream> OpenReadAsync(string blobName, CancellationToken cancellationToken = default) {
     var blobServiceClient = new BlobServiceClient(blobContainerConnectionString);

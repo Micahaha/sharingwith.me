@@ -14,6 +14,10 @@ public interface IFileStorageService {
 
     Uri GenerateSasUploadUrl(string blobName, CancellationToken cancellationToken = default);
 
+    Uri GenerateSasDownloadUrl(string blobName, string originalFileName);
+
+
+
     // Open a file from the storage.
     /// <summary>
     /// Opens a file from the storage.

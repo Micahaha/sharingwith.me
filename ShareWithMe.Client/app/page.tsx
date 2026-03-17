@@ -16,13 +16,23 @@ export default function Page() {
   const [uploadProgress, setUploadProgress] = useState<number>(0)
 
 
-
   return (
     <div className="flex min-h-svh items-center justify-center bg-background px-4">
       <input type="file" hidden ref={fileInputRef}
       onChange={async (e) => {
         const file = e.target.files?.[0]
         if (!file) return
+
+        const CHUNK_SIZE = 1024 * 1024 * 4 // 4MB
+        const chunks: Blob[] = []
+
+        // create chunks of 4MB each
+        let offset = 0
+        while (offset < file.size){
+          chunks.push(file.slice(offset, offset + CHUNK_SIZE))
+          offset += CHUNK_SIZE
+        }
+
 
         const presignResponse = await fetch("http://192.168.1.177:5038/api/files/presign", {
           method: "POST",
@@ -35,18 +45,39 @@ export default function Page() {
         })
         const { sasUrl, blobName } = await presignResponse.json()
 
-        await new Promise<void>((resolve, reject) => {
-          const xhr = new XMLHttpRequest()
-          xhr.upload.onprogress = (ev) => {
-            if (ev.lengthComputable) setUploadProgress(Math.round((ev.loaded / ev.total) * 100))
-          }
-          xhr.onload = () => xhr.status < 400 ? resolve() : reject(new Error(`Azure upload failed: ${xhr.status}`))
-          xhr.onerror = () => reject(new Error("Network error"))
-          xhr.open("PUT", sasUrl)
-          xhr.setRequestHeader("x-ms-blob-type", "BlockBlob")
-          xhr.setRequestHeader("Content-Type", file.type)
-          xhr.send(file)
-        })
+        const blockIds: string[] = []
+let uploaded = 0
+const PARALLEL = 4
+
+for (let i = 0; i < chunks.length; i += PARALLEL) {
+  const batch = chunks.slice(i, i + PARALLEL)
+  await Promise.all(batch.map(async (chunk, batchIndex) => {
+    const chunkIndex = i + batchIndex
+    const blockId = btoa(String(chunkIndex).padStart(6, '0'))
+    blockIds[chunkIndex] = blockId
+
+    await new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest()
+      xhr.onload = () => xhr.status < 400 ? resolve() : reject(new Error(`Block upload failed: ${xhr.status}`))
+      xhr.onerror = () => reject(new Error("Network error"))
+      xhr.open("PUT", `${sasUrl}&comp=block&blockid=${encodeURIComponent(blockId)}`)
+      xhr.setRequestHeader("Content-Type", file.type)
+      xhr.send(chunk)
+    })
+
+    uploaded += chunk.size
+    setUploadProgress(Math.round((uploaded / file.size) * 100))
+  }))
+}
+
+const xml = `<?xml version="1.0" encoding="utf-8"?><BlockList>${blockIds.map(id => `<Latest>${id}</Latest>`).join('')}</BlockList>`
+await fetch(`${sasUrl}&comp=blocklist`, {
+  method: "PUT",
+  headers: { "Content-Type": "application/xml" },
+  body: xml
+})
+
+        
 
         const registerRes = await fetch("http://192.168.1.177:5038/api/files", {
           method: "POST",
@@ -101,17 +132,9 @@ export default function Page() {
 />
               <Download
                 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer"
-                onClick={async () => {
+                onClick={() => {
                   if (!receiveCode) return
-                  const response = await fetch(`http://192.168.1.177:5038/api/files/${receiveCode}`)
-                  if (!response.ok) return
-                  const blob = await response.blob()
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement("a")
-                  a.href = url
-                  a.download = receiveCode
-                  a.click()
-                  URL.revokeObjectURL(url)
+                  window.open(`http://192.168.1.177:5038/api/files/${receiveCode}`, '_blank')
                 }}
               />
             </div>
