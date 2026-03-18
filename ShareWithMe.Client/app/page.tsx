@@ -10,6 +10,7 @@ import { Plus, Download, Linkedin, Github } from "lucide-react"
 
 export default function Page() {
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [shareCode, setShareCode] = useState<string | null>(null)
   const [receiveCode, setReceiveCode] = useState("")
@@ -34,7 +35,7 @@ export default function Page() {
         }
 
 
-        const presignResponse = await fetch("http://192.168.1.177:5038/api/files/presign", {
+        const presignResponse = await fetch("${API_URL}/api/files/presign", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -79,7 +80,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
 
         
 
-        const registerRes = await fetch("http://192.168.1.177:5038/api/files", {
+        const registerRes = await fetch("${API_URL}/api/files", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ blobName, originalFileName: file.name, contentType: file.type, sizeBytes: file.size })
@@ -134,7 +135,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer"
                 onClick={() => {
                   if (!receiveCode) return
-                  window.open(`http://192.168.1.177:5038/api/files/${receiveCode}`, '_blank')
+                  window.open(`${API_URL}/api/files/${receiveCode}`, '_blank')
                 }}
               />
             </div>

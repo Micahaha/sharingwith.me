@@ -13,9 +13,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowShareWithMe", builder =>
+    options.AddPolicy("AllowShareWithMe", policy =>
     {
-        builder.WithOrigins("http://localhost:3000", "http://192.168.1.177:3000")
+        policy.WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(',') ?? new[] { "http://localhost:3000" })
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
