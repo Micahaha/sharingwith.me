@@ -38,17 +38,17 @@ This project exists to explore secure file handling, stateless backend design, a
 - [ ] Audit encryption and key-handling logic
 
 ### API & Backend
-- [ ] Streaming uploads/downloads (no full file buffering)
+- [X] Streaming uploads/downloads (no full file buffering)
 - [ ] Support resumable uploads
-- [ ] Improve API response consistency
+- [X] Improve API response consistency
 - [ ] Add basic health checks
 - [X] Logging (minimal, non-sensitive)
 
 ### UX / DX
 - [X] Simple upload UI
-- [X] Drag-and-drop support
+- [ ] Drag-and-drop support
 - [X] Progress indicators
-- [X] Clear expiration countdown for downloads
+- [ ] Clear expiration countdown for downloads
 - [X] Copy-to-clipboard link/code
 
 ### Optional / Future Ideas
