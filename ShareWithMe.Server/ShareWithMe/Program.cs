@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ShareWithMe.Data;
 using ShareWithMe.Services;
-using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -16,7 +15,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowShareWithMe", policy =>
     {
-        policy.WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(',').Select(o => o.Trim()).ToArray() ?? new[] { "http://localhost:3000" })
+        policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" })
         .AllowAnyMethod()
         .AllowAnyHeader();
     });
