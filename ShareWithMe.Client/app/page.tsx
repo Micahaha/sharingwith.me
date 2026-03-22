@@ -4,9 +4,8 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useRef, useState } from "react"
-import { Plus, Download, Linkedin, Github } from "lucide-react"
-import { useEffect } from "react"
+import { useRef, useState, useEffect } from "react"
+import { Plus, Download, Linkedin, Github, Copy, Check } from "lucide-react"
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -19,6 +18,7 @@ export default function Page() {
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [expiresAt, setExpiresAt] = useState<Date | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
 
   useEffect(() => {
@@ -146,9 +146,22 @@ await fetch(`${sasUrl}&comp=blocklist`, {
           </div>
         )}
         {shareCode && (
-  <p className="text-center text-sm font-mono text-foreground">
-    Your code: <span className="font-bold">{shareCode}</span>
-  </p>
+  <div className="flex items-center justify-center gap-2">
+    <p className="text-center text-sm font-mono text-foreground">
+      Your code: <span className="font-bold">{shareCode}</span>
+    </p>
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(shareCode)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }}
+      className="text-muted-foreground hover:text-foreground transition-colors"
+      aria-label="Copy code"
+    >
+      {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+    </button>
+  </div>
 )}
 {timeRemaining && (
   <p className="text-center text-xs text-muted-foreground">
