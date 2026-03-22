@@ -54,7 +54,11 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
         await _dbContext.Files.AddAsync(fileItem);
         await _dbContext.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetFile), new { shareCode = fileItem.shareCode }, new { url = $"/api/files/{fileItem.shareCode}" });
+        return CreatedAtAction(nameof(GetFile), new { shareCode = fileItem.shareCode }, new RegisterFileResponse
+        {
+            Url = $"/api/files/{fileItem.shareCode}",
+            ExpiresAt = fileItem.ExpiresAt
+        });
         
         }
         catch (Exception ex)
@@ -75,6 +79,8 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
         // query entire row from the database
         var shared_file_record = await _dbContext.Files.Where(f => f.shareCode == shareCode).FirstOrDefaultAsync();
         if (shared_file_record == null) return NotFound();
+
+        
 
         if (shared_file_record.ExpiresAt.HasValue && shared_file_record.ExpiresAt.Value < DateTime.UtcNow)
             return NotFound(new { Message = "This file has expired and is no longer available." });

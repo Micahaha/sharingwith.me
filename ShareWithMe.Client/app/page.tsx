@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRef, useState } from "react"
 import { Plus, Download, Linkedin, Github } from "lucide-react"
+import { useEffect } from "react"
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
@@ -16,7 +17,34 @@ export default function Page() {
   const [shareCode, setShareCode] = useState<string | null>(null)
   const [receiveCode, setReceiveCode] = useState("")
   const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null)
+  const [timeRemaining, setTimeRemaining] = useState<string | null>(null)
 
+
+  useEffect(() => {
+    if (!expiresAt) return
+  
+    const interval = setInterval(() => {
+      const diff = expiresAt.getTime() - Date.now()
+  
+      if (diff <= 0) {
+        setTimeRemaining("Expired")
+        clearInterval(interval)
+        return
+      }
+  
+      const hours = Math.floor(diff / 1000 / 60 / 60)
+      const minutes = Math.floor((diff / 1000 / 60) % 60)
+      const seconds = Math.floor((diff / 1000) % 60)
+  
+      setTimeRemaining(
+        `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      )
+    }, 1000)
+  
+    return () => clearInterval(interval)
+  }, [expiresAt])
+  
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-background px-4">
@@ -90,6 +118,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
 
         if (registerRes.ok) {
           setShareCode(data.url.split('/').pop())
+          setExpiresAt(new Date(data.expiresAt))
           setUploadProgress(0)
         }
       }}
@@ -119,6 +148,11 @@ await fetch(`${sasUrl}&comp=blocklist`, {
         {shareCode && (
   <p className="text-center text-sm font-mono text-foreground">
     Your code: <span className="font-bold">{shareCode}</span>
+  </p>
+)}
+{timeRemaining && (
+  <p className="text-center text-xs text-muted-foreground">
+    Expires in: <span className={timeRemaining === "Expired" ? "text-destructive" : ""}>{timeRemaining}</span>
   </p>
 )}
 
