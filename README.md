@@ -14,12 +14,12 @@ This project exists to explore secure file handling, stateless backend design, a
 ## TODO / Roadmap
 
 ### Core
-- [ ] Finalize encryption flow (key generation, storage, disposal)
+- [X] Finalize encryption flow (key generation, storage, disposal)
 - [ ] Add integrity checks (hash verification on download)
 - [ ] Enforce single-use download links
-- [ ] Configurable expiration time (default ~6 hours)
+- [X] Configurable expiration time (default ~6 hours)
 - [ ] Size limits per upload
-- [ ] Better error handling for expired or already-downloaded files
+- [X] Better error handling for expired or already-downloaded files
 
 ### Storage & Cleanup
 - [X] Azure Blob lifecycle rules for auto-expiration
