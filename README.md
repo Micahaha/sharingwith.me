@@ -48,7 +48,7 @@ This project exists to explore secure file handling, stateless backend design, a
 - [X] Simple upload UI
 - [ ] Drag-and-drop support
 - [X] Progress indicators
-- [ ] Clear expiration countdown for downloads
+- [X] Clear expiration countdown for downloads
 - [X] Copy-to-clipboard link/code
 
 ### Optional / Future Ideas
