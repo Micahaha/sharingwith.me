@@ -192,12 +192,22 @@ await fetch(`${sasUrl}&comp=blocklist`, {
 
         <div className="flex justify-center gap-2">
           <Button variant="ghost" size="icon" asChild>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <a
+              href="https://www.linkedin.com/in/micahahawinters/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Micah Winters on LinkedIn"
+            >
               <Linkedin className="h-5 w-5 text-muted-foreground" />
             </a>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <a
+              href="https://github.com/Micahaha/sharingwith.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="sharingwith.me on GitHub"
+            >
               <Github className="h-5 w-5 text-muted-foreground" />
             </a>
           </Button>

@@ -1,6 +1,6 @@
-ls
-## Sharingwith.me 
+## Sharingwith.me
 
+**Links:** [LinkedIn](https://www.linkedin.com/in/micahahawinters/) · [Repository](https://github.com/Micahaha/sharingwith.me)
 
 A Send Anywhere–style file sharing service built around short-lived, encrypted uploads with no accounts, no tracking, and no long-term storage.
 
