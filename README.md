@@ -22,16 +22,16 @@ This project exists to explore secure file handling, stateless backend design, a
 - [ ] Better error handling for expired or already-downloaded files
 
 ### Storage & Cleanup
-- [ ] Azure Blob lifecycle rules for auto-expiration
-- [ ] Background worker for:
+- [X] Azure Blob lifecycle rules for auto-expiration
+- [X] Background worker for:
   - expired files
   - completed downloads
   - abandoned uploads
-- [ ] Safe deletion verification (confirm blob removal)
+- [X] Safe deletion verification (confirm blob removal)
 - [ ] Cleanup retry logic for failed deletes
 
 ### Security Hardening
-- [ ] Rate limiting on upload and download endpoints
+- [X] Rate limiting on upload and download endpoints
 - [ ] Brute-force protection on download codes
 - [ ] Optional password-based encryption
 - [ ] Time-safe comparisons for access codes
