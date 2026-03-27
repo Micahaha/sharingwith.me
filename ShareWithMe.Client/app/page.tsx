@@ -194,7 +194,11 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             </div>
             {downloadUrl && originalFileName && (
               <a href={downloadUrl} download={originalFileName} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-mono text-foreground">
-                {originalFileName}
+                {originalFileName} {expiresAt && (
+                  <span className="text-xs text-muted-foreground">
+                    {expiresAt.toLocaleString()}
+                  </span>
+                )}
               </a>
             )}
           </CardContent>
