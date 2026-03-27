@@ -18,6 +18,8 @@ export default function Page() {
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [expiresAt, setExpiresAt] = useState<Date | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+  const [originalFileName, setOriginalFileName] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
 
@@ -181,12 +183,20 @@ await fetch(`${sasUrl}&comp=blocklist`, {
 />
               <Download
                 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer"
-                onClick={() => {
+                onClick={async () => {
                   if (!receiveCode) return
-                  window.open(`${API_URL}/api/files/${receiveCode}`, '_blank')
+                  const response = await fetch(`${API_URL}/api/files/${receiveCode}`)
+                  const data = await response.json()
+                  setDownloadUrl(data.sasUrl)
+                  setOriginalFileName(data.originalFileName)
                 }}
               />
             </div>
+            {downloadUrl && originalFileName && (
+              <a href={downloadUrl} download={originalFileName} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-mono text-foreground">
+                {originalFileName}
+              </a>
+            )}
           </CardContent>
         </Card>
 

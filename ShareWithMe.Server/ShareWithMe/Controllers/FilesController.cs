@@ -80,13 +80,13 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
         var shared_file_record = await _dbContext.Files.Where(f => f.shareCode == shareCode).FirstOrDefaultAsync();
         if (shared_file_record == null) return NotFound();
 
-        
+
+        // Check if file expired
 
         if (shared_file_record.ExpiresAt.HasValue && shared_file_record.ExpiresAt.Value < DateTime.UtcNow)
-            return NotFound(new { Message = "This file has expired and is no longer available." });
+            return NotFound(new { Message = $"This file has expired and is no longer available. Expired at: {shared_file_record.ExpiresAt.Value}" });
 
         var sasUri = _fileStorageService.GenerateSasDownloadUrl(shared_file_record.BlobName, shared_file_record.OriginalFileName);
-        return Redirect(sasUri.ToString());
-        // test the file stream result
+        return Ok(new { sasUrl = sasUri.ToString(), originalFileName = shared_file_record.OriginalFileName });
     }
 }
