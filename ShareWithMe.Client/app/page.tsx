@@ -189,6 +189,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                   const data = await response.json()
                   setDownloadUrl(data.sasUrl)
                   setOriginalFileName(data.originalFileName)
+                  setExpiresAt(new Date(data.expiresAt))
                 }}
               />
             </div>
@@ -196,7 +197,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
               <a href={downloadUrl} download={originalFileName} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-mono text-foreground">
                 {originalFileName} {expiresAt && (
                   <span className="text-xs text-muted-foreground">
-                    {expiresAt.toLocaleString()}
+                    Expires at: {expiresAt.toLocaleString()}
                   </span>
                 )}
               </a>

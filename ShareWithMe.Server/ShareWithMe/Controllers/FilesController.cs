@@ -87,6 +87,6 @@ return Ok(new { sasUrl = sasUri.ToString(), blobName});
             return NotFound(new { Message = $"This file has expired and is no longer available. Expired at: {shared_file_record.ExpiresAt.Value}" });
 
         var sasUri = _fileStorageService.GenerateSasDownloadUrl(shared_file_record.BlobName, shared_file_record.OriginalFileName);
-        return Ok(new { sasUrl = sasUri.ToString(), originalFileName = shared_file_record.OriginalFileName });
+        return Ok(new { sasUrl = sasUri.ToString(), originalFileName = shared_file_record.OriginalFileName, expiresAt = shared_file_record.ExpiresAt });
     }
 }
