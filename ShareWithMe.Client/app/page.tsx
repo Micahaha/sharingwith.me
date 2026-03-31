@@ -21,7 +21,17 @@ export default function Page() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [originalFileName, setOriginalFileName] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [fileHistory, setFileHistory] = useState<{ type: string; originalFileName: string; shareCode: string; expiresAt: string }[]>([])
+  
 
+  // grabs stored history from localStorage
+
+  useEffect(() => {
+    const storedHistory = localStorage.getItem("fileHistory")
+    if (storedHistory) {
+      setFileHistory(JSON.parse(storedHistory))
+    }
+  }, []);
 
   useEffect(() => {
     if (!expiresAt) return
@@ -122,6 +132,11 @@ await fetch(`${sasUrl}&comp=blocklist`, {
           setShareCode(data.url.split('/').pop())
           setExpiresAt(new Date(data.expiresAt))
           setUploadProgress(0)
+
+          // File History Feature: Add the new entry to the file history and save it to localStorage
+          const updatedHistory = [...fileHistory, { type: "upload", originalFileName: file.name, shareCode: data.url.split('/').pop() || "", expiresAt: data.expiresAt }]  // build it
+          setFileHistory(updatedHistory)                         
+          localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
         }
       }}
       />
@@ -141,12 +156,16 @@ await fetch(`${sasUrl}&comp=blocklist`, {
               <Plus className="h-10 w-10 text-primary" strokeWidth={1.5} />
             </div>
           </CardContent>
+
+         
         </Card>
         {uploadProgress > 0 && uploadProgress < 100 && (
           <div className="w-full bg-muted rounded-full h-2">
             <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
           </div>
         )}
+
+
         {shareCode && (
   <div className="flex items-center justify-center gap-2">
     <p className="text-center text-sm font-mono text-foreground">
@@ -181,6 +200,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
               placeholder="Input key"
               className="pr-10"
 />
+  
               <Download
                 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer"
                 onClick={async () => {
@@ -190,6 +210,11 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                   setDownloadUrl(data.sasUrl)
                   setOriginalFileName(data.originalFileName)
                   setExpiresAt(new Date(data.expiresAt))
+
+                  // File History Feature: Add the new entry to the file history and save it to localStorage
+                  const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt }]  // build it
+                  setFileHistory(updatedHistory)                         
+                  localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
                 }}
               />
             </div>
@@ -204,6 +229,21 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             )}
           </CardContent>
         </Card>
+        <Card>
+          <CardContent className="flex flex-col gap-2 p-6">
+            <p className="font-semibold text-foreground text-center">File History</p>
+            <div className="flex flex-col gap-2">
+              {fileHistory.map((entry, index) => (
+                  <div key={`${entry.shareCode}-${index}`}>
+                  <div>{entry.originalFileName}</div>
+                  <div>{new Date(entry.expiresAt).toLocaleString()}</div>
+                  <div>{entry.type}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+    
 
         <div className="flex justify-center gap-2">
           <Button variant="ghost" size="icon" asChild>
