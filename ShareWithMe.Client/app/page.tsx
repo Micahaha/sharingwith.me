@@ -21,7 +21,7 @@ export default function Page() {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [originalFileName, setOriginalFileName] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
-  const [fileHistory, setFileHistory] = useState<{ type: string; originalFileName: string; shareCode: string; expiresAt: string }[]>([])
+  const [fileHistory, setFileHistory] = useState<{ type: string; originalFileName: string; shareCode: string; expiresAt: string; sasUrl: string | null }[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // grabs stored history from localStorage
@@ -134,7 +134,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
           setUploadProgress(0)
 
           // File History Feature: Add the new entry to the file history and save it to localStorage
-          const updatedHistory = [...fileHistory, { type: "upload", originalFileName: file.name, shareCode: data.url.split('/').pop() || "", expiresAt: data.expiresAt }]  // build it
+          const updatedHistory = [...fileHistory, { type: "upload", originalFileName: file.name, shareCode: data.url.split('/').pop() || "", expiresAt: data.expiresAt, sasUrl: null }]
           setFileHistory(updatedHistory)                         
           localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
         }
@@ -216,7 +216,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                     setExpiresAt(new Date(data.expiresAt))
 
                     // File History Feature: Add the new entry to the file history and save it to localStorage
-                    const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt }]  // build it
+                    const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt, sasUrl: data.sasUrl }]
                     setFileHistory(updatedHistory)                         
                     localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
                   }
@@ -248,7 +248,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             <div className="flex flex-col gap-2">
               {fileHistory.map((entry, index) => (
                   <div key={`${entry.shareCode}-${index}`}>
-                  <div>File name: <a href={`${API_URL}/api/files/${entry.shareCode}`} target="_blank" rel="noopener noreferrer">{entry.originalFileName}</a></div>
+                  <div>File name: {entry.sasUrl ? <a href={entry.sasUrl} download={entry.originalFileName}>{entry.originalFileName}</a> : entry.originalFileName}</div>
                   <div>Expires at: {new Date(entry.expiresAt).toLocaleString()}</div>
                   <div>Type: {entry.type}</div>
                   </div>
@@ -256,7 +256,6 @@ await fetch(`${sasUrl}&comp=blocklist`, {
               </div>
             </CardContent>
           </Card>
-        </div>
         <div className="flex justify-center gap-2">
           <Button variant="ghost" size="icon" asChild>
             <a
@@ -280,5 +279,6 @@ await fetch(`${sasUrl}&comp=blocklist`, {
           </Button>
         </div>
       </div>
+    </div>
   )
 }
