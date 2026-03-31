@@ -22,7 +22,7 @@ export default function Page() {
   const [originalFileName, setOriginalFileName] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [fileHistory, setFileHistory] = useState<{ type: string; originalFileName: string; shareCode: string; expiresAt: string }[]>([])
-  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // grabs stored history from localStorage
 
@@ -205,19 +205,32 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground cursor-pointer"
                 onClick={async () => {
                   if (!receiveCode) return
+                
+
                   const response = await fetch(`${API_URL}/api/files/${receiveCode}`)
                   const data = await response.json()
-                  setDownloadUrl(data.sasUrl)
-                  setOriginalFileName(data.originalFileName)
-                  setExpiresAt(new Date(data.expiresAt))
+                  if (response.ok) {
+                    setErrorMessage(null)
+                    setDownloadUrl(data.sasUrl)
+                    setOriginalFileName(data.originalFileName)
+                    setExpiresAt(new Date(data.expiresAt))
 
-                  // File History Feature: Add the new entry to the file history and save it to localStorage
-                  const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt }]  // build it
-                  setFileHistory(updatedHistory)                         
-                  localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
+                    // File History Feature: Add the new entry to the file history and save it to localStorage
+                    const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt }]  // build it
+                    setFileHistory(updatedHistory)                         
+                    localStorage.setItem("fileHistory", JSON.stringify(updatedHistory))  // save it to localStorage
+                  }
+                  else {
+                    setErrorMessage("File not found or expired")
+                    setTimeout(() => setErrorMessage(null), 3000)
+                  }
                 }}
               />
+              
             </div>
+            {errorMessage && (
+              <p className="text-center text-xs text-destructive">{errorMessage}</p>
+            )}
             {downloadUrl && originalFileName && (
               <a href={downloadUrl} download={originalFileName} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-mono text-foreground">
                 {originalFileName} {expiresAt && (
@@ -235,16 +248,15 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             <div className="flex flex-col gap-2">
               {fileHistory.map((entry, index) => (
                   <div key={`${entry.shareCode}-${index}`}>
-                  <div>{entry.originalFileName}</div>
-                  <div>{new Date(entry.expiresAt).toLocaleString()}</div>
-                  <div>{entry.type}</div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-    
-
+                  <div>File name: <a href={`${API_URL}/api/files/${entry.shareCode}`} target="_blank" rel="noopener noreferrer">{entry.originalFileName}</a></div>
+                  <div>Expires at: {new Date(entry.expiresAt).toLocaleString()}</div>
+                  <div>Type: {entry.type}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
         <div className="flex justify-center gap-2">
           <Button variant="ghost" size="icon" asChild>
             <a
@@ -268,6 +280,5 @@ await fetch(`${sasUrl}&comp=blocklist`, {
           </Button>
         </div>
       </div>
-    </div>
   )
 }
