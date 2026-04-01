@@ -282,13 +282,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                   </div>
                   <div>Expires at: {new Date(entry.expiresAt).toLocaleString()}</div>
                   <div> Sharable Code: {entry.shareCode}</div>
-                  if (entry.type === "download") {
-                  <div>Previously Downloaded </div>
-                  }
-                  else 
-                  {
-                    <div>Previously Uploaded</div>
-                  }
+                  <div>{entry.type === "download" ? "Previously Downloaded" : "Previously Uploaded"}</div>
                 </div>
               ))}
             </div>
