@@ -29,7 +29,10 @@ export default function Page() {
   useEffect(() => {
     const storedHistory = localStorage.getItem("fileHistory")
     if (storedHistory) {
-      setFileHistory(JSON.parse(storedHistory))
+      const parsed = JSON.parse(storedHistory)
+      const active = parsed.filter((e: typeof fileHistory[number]) => new Date(e.expiresAt).getTime() > Date.now())
+      setFileHistory(active)
+      localStorage.setItem("fileHistory", JSON.stringify(active))
     }
   }, []);
 
@@ -242,20 +245,47 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             )}
           </CardContent>
         </Card>
-        <Card>
+        {fileHistory.length > 0 && <Card className="bg-background border border-dashed border-border/60 shadow-none">
           <CardContent className="flex flex-col gap-2 p-6">
             <p className="font-semibold text-foreground text-center">File History</p>
             <div className="flex flex-col gap-2">
               {fileHistory.map((entry, index) => (
-                  <div key={`${entry.shareCode}-${index}`}>
-                  <div>File name: {entry.sasUrl ? <a href={entry.sasUrl} download={entry.originalFileName}>{entry.originalFileName}</a> : entry.originalFileName}</div>
+                <div key={`${entry.shareCode}-${index}`} className="text-sm text-gray-500 dark:text-gray-400">
+                  <div>
+                    File name:{" "}
+                    {entry.sasUrl ? (
+                      <a
+                        href={entry.sasUrl}
+                        download={entry.originalFileName}
+                        className="underline hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                      >
+                        {entry.originalFileName}
+                      </a>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          const response = await fetch(`${API_URL}/api/files/${entry.shareCode}`)
+                          const data = await response.json()
+                          if (response.ok) {
+                            const link = document.createElement("a")
+                            link.href = data.sasUrl
+                            link.download = entry.originalFileName
+                            link.click()
+                          }
+                        }}
+                        className="underline hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                      >
+                        {entry.originalFileName}
+                      </button>
+                    )}
+                  </div>
                   <div>Expires at: {new Date(entry.expiresAt).toLocaleString()}</div>
                   <div>Type: {entry.type}</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>}
         <div className="flex justify-center gap-2">
           <Button variant="ghost" size="icon" asChild>
             <a
