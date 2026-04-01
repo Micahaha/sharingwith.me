@@ -16,7 +16,8 @@ export default function Page() {
   const [shareCode, setShareCode] = useState<string | null>(null)
   const [receiveCode, setReceiveCode] = useState("")
   const [uploadProgress, setUploadProgress] = useState<number>(0)
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null)
+  const [uploadExpiresAt, setUploadExpiresAt] = useState<Date | null>(null)
+  const [downloadExpiresAt, setDownloadExpiresAt] = useState<Date | null>(null)
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null)
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
   const [originalFileName, setOriginalFileName] = useState<string | null>(null)
@@ -37,10 +38,10 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (!expiresAt) return
+    if (!uploadExpiresAt) return
   
     const interval = setInterval(() => {
-      const diff = expiresAt.getTime() - Date.now()
+      const diff = uploadExpiresAt.getTime() - Date.now()
   
       if (diff <= 0) {
         setTimeRemaining("Expired")
@@ -58,7 +59,7 @@ export default function Page() {
     }, 1000)
   
     return () => clearInterval(interval)
-  }, [expiresAt])
+  }, [uploadExpiresAt])
   
 
   return (
@@ -133,7 +134,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
 
         if (registerRes.ok) {
           setShareCode(data.url.split('/').pop())
-          setExpiresAt(new Date(data.expiresAt))
+          setUploadExpiresAt(new Date(data.expiresAt))
           setUploadProgress(0)
 
           // File History Feature: Add the new entry to the file history and save it to localStorage
@@ -216,7 +217,7 @@ await fetch(`${sasUrl}&comp=blocklist`, {
                     setErrorMessage(null)
                     setDownloadUrl(data.sasUrl)
                     setOriginalFileName(data.originalFileName)
-                    setExpiresAt(new Date(data.expiresAt))
+                    setDownloadExpiresAt(new Date(data.expiresAt))
 
                     // File History Feature: Add the new entry to the file history and save it to localStorage
                     const updatedHistory = [...fileHistory, { type: "download", originalFileName: data.originalFileName, shareCode: receiveCode, expiresAt: data.expiresAt, sasUrl: data.sasUrl }]
@@ -236,9 +237,9 @@ await fetch(`${sasUrl}&comp=blocklist`, {
             )}
             {downloadUrl && originalFileName && (
               <a href={downloadUrl} download={originalFileName} className="text-muted-foreground hover:text-foreground transition-colors text-sm font-mono text-foreground">
-                {originalFileName} {expiresAt && (
+                {originalFileName} {downloadExpiresAt && (
                   <span className="text-xs text-muted-foreground">
-                    Expires at: {expiresAt.toLocaleString()}
+                    Expires at: {downloadExpiresAt.toLocaleString()}
                   </span>
                 )}
               </a>
